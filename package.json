@@ -9,6 +9,17 @@
   "scripts": {
     "up": "node scripts/ambiente.mjs up",
     "down": "node scripts/ambiente.mjs down",
-    "status": "node scripts/ambiente.mjs status"
+    "status": "node scripts/ambiente.mjs status",
+    "gates": "node scripts/gates.mjs",
+    "gates:commit": "node scripts/gates.mjs --commit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "dependency-cruiser": "^18.9.0",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "knip": "^6.48.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.74.0"
   }
 }
