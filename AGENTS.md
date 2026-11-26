@@ -17,6 +17,7 @@ Central de chamados: API (Express + Prisma + Postgres), worker de triagem (proce
 - Corrija a causa. Não vale `eslint-disable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any`
   explícito nem tirar arquivo das ferramentas.
 - Mexeu em configuração de gate? Rode `bash kit-gates/verificar.sh . "npm run gates"` (todas barradas).
+  Achou um furo num gate? Procure o mesmo furo nos outros (extensão, glob, alias) antes de fechar.
 - Regras G1 a G13, ferramentas e exemplos de violação: [docs/gates.md](docs/gates.md).
 
 ## Camadas
