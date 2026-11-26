@@ -1,0 +1,14 @@
+{
+  "name": "balcao",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Harness do Balcão: ambiente por cópia, gates e hook.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "up": "node scripts/ambiente.mjs up",
+    "down": "node scripts/ambiente.mjs down",
+    "status": "node scripts/ambiente.mjs status"
+  }
+}
