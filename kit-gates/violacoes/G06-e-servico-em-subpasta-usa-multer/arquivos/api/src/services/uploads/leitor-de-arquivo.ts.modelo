@@ -1,0 +1,5 @@
+import type multer from 'multer'
+
+export function tamanhoMaximo(opcoes: multer.Options) {
+  return opcoes.limits?.fileSize ?? 0
+}

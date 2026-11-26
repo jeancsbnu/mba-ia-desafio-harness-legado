@@ -1,0 +1,4 @@
+export async function buscarUsuario(id: string) {
+  const { userRepository } = await import('../repositories/user-repository')
+  return userRepository.findById(id)
+}

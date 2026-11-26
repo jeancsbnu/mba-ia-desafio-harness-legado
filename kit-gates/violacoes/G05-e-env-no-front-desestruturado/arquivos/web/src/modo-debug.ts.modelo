@@ -1,0 +1,3 @@
+const { env } = import.meta
+
+export const DEBUG = env.DEV

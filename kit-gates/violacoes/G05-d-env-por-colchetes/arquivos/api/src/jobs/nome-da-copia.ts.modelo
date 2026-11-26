@@ -1,0 +1,1 @@
+export const NOME_DA_COPIA = process['env'].BALCAO_COPIA ?? 'local'

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# Hook de pre-commit do Balcão (ativado por `npm run up`, via core.hooksPath).
+#
+# Roda os gates de TIPO e de LINT sobre o que está no stage, que é exatamente
+# o que vai entrar no commit:
+#   G1  tipo:  tsc --noEmit em api/ e em web/
+#   G2  lint:  eslint (sem erro e sem warning), que também cobre G5 e G11
+# Se qualquer um falhar, o commit é bloqueado e a lista de violações aparece.
+# A lista completa (G1 a G13) roda com `npm run gates`.
+exec node "$(git rev-parse --show-toplevel)/scripts/pre-commit.mjs"

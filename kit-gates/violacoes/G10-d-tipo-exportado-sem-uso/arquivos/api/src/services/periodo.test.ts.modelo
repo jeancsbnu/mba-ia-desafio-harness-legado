@@ -1,0 +1,6 @@
+import { expect, it } from 'vitest'
+import { duracao } from './periodo'
+
+it('mede a duração', () => {
+  expect(duracao({ inicio: new Date(0), fim: new Date(10) })).toBe(10)
+})
