@@ -14,7 +14,7 @@
 // dependency-cruiser (G4, G6, G7, G8, G9, G12), knip (G10) e a checagem de
 // documentação deste arquivo (G13). Nada é escrito dentro do repositório.
 
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -280,6 +280,17 @@ const VERIFICACOES = [
   { nome: 'G13 documentação para agentes', rodar: documentacao },
 ]
 
+// Aviso, não violação: num clone que ainda não rodou `npm run up`, o hook de
+// pre-commit não está ativo e um commit passaria sem tipo e lint.
+function avisoDoHook() {
+  if (SO_COMMIT || !fs.existsSync(path.join(RAIZ, '.git'))) return null
+  const r = spawnSync('git', ['config', '--get', 'core.hooksPath'], { cwd: RAIZ, encoding: 'utf8' })
+  if (r.error) return null
+  const configurado = r.stdout.trim()
+  if (configurado && path.resolve(RAIZ, configurado) === path.join(RAIZ, '.githooks')) return null
+  return 'Aviso: o hook de pre-commit não está ativo nesta cópia. Rode `npm run up` (ou `git config core.hooksPath .githooks`).'
+}
+
 const selecionadas = VERIFICACOES.filter((v) => !SO_COMMIT || v.commit)
 const inicio = Date.now()
 process.stdout.write(`Gates do Balcão${SO_COMMIT ? ' (pre-commit: tipo e lint)' : ''}: ${selecionadas.length} verificações\n`)
@@ -309,6 +320,9 @@ const todas = resultados
   .sort((a, b) => numero(a.id) - numero(b.id) || a.arquivo.localeCompare(b.arquivo))
   .map((v) => `${v.id} ${v.arquivo}  (${v.detalhe})`)
   .filter((linha) => !vistas.has(linha) && vistas.add(linha))
+
+const aviso = avisoDoHook()
+if (aviso) process.stdout.write(`\n${aviso}\n`)
 
 const total = ((Date.now() - inicio) / 1000).toFixed(1)
 if (todas.length === 0) {

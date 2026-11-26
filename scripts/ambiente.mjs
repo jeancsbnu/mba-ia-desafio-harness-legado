@@ -417,9 +417,18 @@ async function down() {
   const parados = await pararProcessos(estado)
   log(`  processos encerrados: ${parados.length ? parados.join(', ') : 'nenhum estava rodando'}`)
   const apagarVolume = process.argv.includes('--apagar-dados')
+  // Olha antes de derrubar, para a mensagem dizer o que de fato aconteceu.
+  const doProjeto = ['--filter', `label=com.docker.compose.project=${PROJETO}`]
+  const tinhaContainer = Boolean(rodar('docker', ['ps', '-aq', ...doProjeto]).stdout?.trim())
+  const tinhaDados = Boolean(rodar('docker', ['volume', 'ls', '-q', ...doProjeto]).stdout?.trim())
   const r = compose(['down', ...(apagarVolume ? ['-v'] : [])])
   if (r.status !== 0) log(`  aviso: docker compose down falhou: ${(r.stderr || '').trim()}`)
-  else log(`  Postgres da cópia parado${apagarVolume ? ' e dados apagados' : ' (dados mantidos no volume)'}`)
+  else if (!tinhaContainer && !tinhaDados) log('  Postgres da cópia: nada para parar nem apagar')
+  else {
+    const parado = tinhaContainer ? 'parado' : 'já estava parado'
+    const dados = !tinhaDados ? 'não havia dados no volume' : apagarVolume ? 'dados apagados' : 'dados mantidos no volume'
+    log(`  Postgres da cópia ${parado} (${dados})`)
+  }
   if (Object.keys(estado).length) salvarEstado({ ...estado, processos: {} })
 }
 

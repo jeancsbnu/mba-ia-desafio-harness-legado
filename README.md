@@ -135,8 +135,21 @@ o CORS aceita o front da própria cópia. As variáveis também vão explícitas
 `PORT` exportado no shell não aponte a cópia para outro lugar. A seed passou a ser idempotente. `npm run
 down` encerra só os grupos de processos e o projeto compose da cópia: nada é procurado por porta.
 
-**Como as violações que já existiam foram corrigidas.** Os gates entraram primeiro, acendendo 88
-violações, e o código foi corrigido guiado pela lista, sem nenhuma supressão:
+**Como as violações que já existiam foram corrigidas.** Os gates entraram primeiro, no commit `cba848b`,
+acendendo 88 violações. Por regra:
+
+| Regra | G2 | G10 | G5 | G4 | G6 | G11 | G8 | G9 | G7 | G12 | G13 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Violações | 35 | 15 | 12 | 10 | 5 | 4 | 2 | 2 | 1 | 1 | 1 |
+
+Para reproduzir:
+
+1. `git worktree add --detach ../balcao-cba848b cba848b`
+2. `npm ci` na raiz, em `api/` e em `web/`
+3. `npx prisma generate` em `api/`
+4. `node scripts/gates.mjs`
+
+Depois, o código foi corrigido guiado pela lista, sem nenhuma supressão:
 
 - **G4:** as rotas viraram fábricas que recebem serviços prontos, e o `main.ts` monta repositórios ->
   serviços -> app. Estatísticas, health e sugestão ganharam serviço ou função injetada.
