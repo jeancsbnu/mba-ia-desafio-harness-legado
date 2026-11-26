@@ -40,13 +40,16 @@ apareceu porque o agente comparou a lista com as violações que sabia existir n
 **Por que o harness deixou.** O kit original tem uma violação por forma de escrever cada regra, e o agente
 ainda não tinha rodado o kit depois de mexer na configuração.
 
-**Mudança no harness.** A opção foi corrigida, com um comentário explicando por que `node_modules` não
-pode estar em `exclude`. O `kit-gates/violacoes/` ganhou variações que pegam esse tipo de regressão:
-tipo inline do express, multer numa subpasta de serviços, tipo do openai num job, tipo do Prisma numa
-rota, Prisma num job, ciclo só de tipo e outras. O `AGENTS.md` e o `docs/gates.md` mandam rodar o kit
-sempre que a configuração de um gate mudar.
+**Mudança no harness.** O erro foi pego antes do primeiro commit dos gates. Por isso o
+`.dependency-cruiser.cjs` já entrou certo em `cba848b`: só `doNotFollow` para `node_modules`, com um
+comentário explicando por que ele não pode estar em `exclude`. O que impede a repetição veio depois. O
+`kit-gates/violacoes/` ganhou variações que pegam esse tipo de regressão: tipo inline do express, multer
+numa subpasta de serviços, tipo do openai num job, tipo do Prisma numa rota, Prisma num job, ciclo só de
+tipo e outras. O `AGENTS.md` e o `docs/gates.md` mandam rodar o kit sempre que a configuração de um gate
+mudar.
 
-**Commit:** `b44fcbb` (Hook de pre-commit: tipo e lint sobre o que está no stage, com as variações do kit)
+**Commits:** `cba848b` (Gates, com a configuração do dependency-cruiser já corrigida e comentada) e
+`b44fcbb` (variações do kit que barram a regressão)
 
 ---
 
@@ -86,3 +89,24 @@ antes do fim, e nenhum teste cortava a saída.
 o fim e o código de saída dos gates não muda.
 
 **Commit:** `0d66284` (Scripts do harness não quebram com a saída cortada)
+
+---
+
+## 5. Uma revisão independente achou formas de violação que passavam pelos gates
+
+**O que aconteceu.** Depois do merge, outro agente (Sonnet) revisou a entrega sem ver o raciocínio de
+quem a fez e plantou umas 120 variações de violação. Três passavam em branco, e todas eram erro do agente
+que configurou os gates. Na G6, um `import type { Request } from 'express-serve-static-core'` num
+serviço não era acusado: o pacote resolve para `@types/express-serve-static-core`, e a regra só conhecia
+`@types/express`. Na G10, um arquivo sem uso com extensão `.mts` ou `.js` não era acusado, porque o
+`knip.json` só olhava `.ts` e `.tsx`. A revisão também apontou que `web/vite.config.ts` ainda fixava a
+porta 5173, e que o incidente 2 citava um commit que não continha a correção descrita.
+
+**Por que o harness deixou.** As variações do kit cobriam as formas que o próprio agente imaginou. Quem
+escreve a regra tende a testar só o que já pensou.
+
+**Mudança no harness.** A regra G6 passou a incluir os pacotes de tipos do Express e do multer. O knip
+agora olha ts, tsx, mts, cts, js, jsx, mjs e cjs em `api/` e `web/`. O kit ganhou as variações G06-f,
+G10-f e G10-g. O Vite lê a porta de `WEB_PORT`, que o `npm run up` grava no `web/.env.local`.
+
+**Commit:** `db2857d` (Revisão: G6 pega os tipos do Express, G10 olha todas as extensões)
