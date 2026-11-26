@@ -424,8 +424,11 @@ async function down() {
   const r = compose(['down', ...(apagarVolume ? ['-v'] : [])])
   if (r.status !== 0) log(`  aviso: docker compose down falhou: ${(r.stderr || '').trim()}`)
   else if (!tinhaContainer && !tinhaDados) log('  Postgres da cópia: nada para parar nem apagar')
-  else if (!tinhaDados) log('  Postgres da cópia parado (não havia dados no volume)')
-  else log(`  Postgres da cópia parado${apagarVolume ? ' e dados apagados' : ' (dados mantidos no volume)'}`)
+  else {
+    const parado = tinhaContainer ? 'parado' : 'já estava parado'
+    const dados = !tinhaDados ? 'não havia dados no volume' : apagarVolume ? 'dados apagados' : 'dados mantidos no volume'
+    log(`  Postgres da cópia ${parado} (${dados})`)
+  }
   if (Object.keys(estado).length) salvarEstado({ ...estado, processos: {} })
 }
 
