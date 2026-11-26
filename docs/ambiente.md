@@ -1,7 +1,12 @@
 # Ambiente: uma cópia isolada por clone ou worktree
 
 `npm run up`, `npm run down` e `npm run status` chamam `scripts/ambiente.mjs`, que só usa módulos do
-Node e roda em Linux e macOS com Node 22+, Docker (com `docker compose`) e Git. No Windows, use o WSL.
+Node e roda em Linux e macOS com Docker (com `docker compose`) e Git. No Windows, use o WSL.
+
+O Node precisa estar na faixa do `engines` do `package.json` da raiz: `^22.13.0 || ^24.0.0 || >=26.0.0`,
+a interseção do que as ferramentas declaram. Na prática, a versão mais nova da linha 22, 24 ou 26. A faixa
+só fica escrita ali: `scripts/node-suportado.mjs` a lê, e a subida e os gates param antes de tudo quando o
+Node está fora.
 
 ## O que identifica uma cópia
 
@@ -21,7 +26,7 @@ diferentes, têm nomes diferentes. Tudo o que a cópia cria leva esse nome ou fi
 
 ## O que a subida faz, em ordem
 
-1. Confere Node, Docker e Git.
+1. Confere a versão do Node (contra o `engines` do `package.json`), Docker e Git.
 2. Encerra os processos que ESTA cópia tinha deixado de pé (confere PID e horário de início, para não
    matar um processo que reaproveitou o PID).
 3. Roda `npm ci` na raiz, em `api/` e em `web/`, só quando o `package-lock.json` mudou desde a última
@@ -60,6 +65,9 @@ não aparece na outra, e cada worker só tria os chamados do próprio banco.
 
 ## Problemas comuns
 
+- **"Node X não é suportado"**: instale a versão mais nova da linha 22, 24 ou 26. Abaixo da 22.13, o
+  `npm ci` só avisa (EBADENGINE), mas as ferramentas não garantem nada: na 22.11, o knip quebra com
+  `ERR_REQUIRE_ESM`.
 - **"o Docker não está respondendo"**: abra o Docker (no WSL, ligue a integração da distro no Docker
   Desktop) e rode `npm run up` de novo.
 - **Algo não ficou de pé**: a subida mostra o fim do log; o log completo está em `.balcao/logs/`.

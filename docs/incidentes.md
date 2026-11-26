@@ -157,3 +157,29 @@ as cópias rodam os testes ao mesmo tempo, e a mensagem diz como criar a pasta t
 
 **Commits:** `7e16d83` (Gates: G5 e G11 em todas as extensões, G5 sem falso positivo, G13 confere npm
 test) e `ea9fbd9` (AGENTS.md: furo achado num gate se procura também nos outros)
+
+---
+
+## 8. O harness prometia Node 22, e na 22.11 o knip quebrava
+
+**O que aconteceu.** O README dizia "Node.js 22 ou mais novo", os quatro `package.json` declaravam
+`>=22` e o `npm run up` só recusava versões abaixo da 22. O agente que escreveu isso tinha rodado tudo só
+no Node 26. Quando o usuário pediu um teste com o Node 22, a versão mais nova da linha (22.23.5) passou
+em tudo, mas a 22.11 não: o `npm run up` aceitou, e o G10 falhou com `ERR_REQUIRE_ESM` dentro do knip,
+sem dizer que o motivo era a versão do Node. Na 22.12, os gates passavam, mas o `npm ci` emitia 11 avisos
+EBADENGINE, porque o ESLint 10 só declara suporte a partir da 22.13.
+
+**Por que o harness deixou.** A versão mínima foi escrita de memória, sem olhar o `engines` das
+dependências e sem testar a versão mais baixa prometida. O `npm ci` só avisa quando o `engines` não bate,
+e a subida esconde a saída dele quando a instalação dá certo.
+
+**Mudança no harness.** O `engines` dos quatro `package.json` (e dos lockfiles) virou
+`^22.13.0 || ^24.0.0 || >=26.0.0`, a interseção do que as 252 dependências com `engines` declaram.
+`scripts/node-suportado.mjs` lê essa faixa, e a subida, os gates e o hook param antes de qualquer outra
+coisa quando o Node está fora, dizendo o que instalar. A faixa só fica escrita no `package.json`. Num
+clone limpo, a 22.13.0 passou em tudo sem nenhum aviso EBADENGINE, e a 22.11 e a 22.12 foram recusadas
+antes de instalar qualquer coisa. O que ainda escapa: uma atualização de dependência que suba o piso. O
+npm só avisa quem roda a versão afetada.
+
+**Commits:** `d6737d5` (Node: versão mínima 22.13, conferida na subida e nos gates) e `94d865d` (Hook:
+Node fora da faixa bloqueia o commit com mensagem própria)

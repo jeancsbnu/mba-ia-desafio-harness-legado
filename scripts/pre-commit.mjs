@@ -9,6 +9,14 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import { problemaDoNode } from './node-suportado.mjs'
+
+const nodeRuim = problemaDoNode()
+if (nodeRuim) {
+  process.stderr.write(`pre-commit: ${nodeRuim}\nCommit bloqueado: com esse Node, tipo e lint não são confiáveis.\n`)
+  process.exit(1)
+}
+
 const raiz = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).stdout.trim()
 const pacotes = ['.', 'api', 'web']
 

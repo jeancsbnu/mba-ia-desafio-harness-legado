@@ -20,6 +20,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { problemaDoNode } from './node-suportado.mjs'
+
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SO_COMMIT = process.argv.includes('--commit')
 
@@ -27,6 +29,14 @@ const SO_COMMIT = process.argv.includes('--commit')
 process.stdout.on('error', (err) => {
   if (err.code !== 'EPIPE') throw err
 })
+
+// Com o Node fora da faixa, uma ferramenta quebra sem dizer por quê (o knip, na
+// 22.11) e a falha parece violação. Melhor parar antes, com o motivo.
+const nodeRuim = problemaDoNode()
+if (nodeRuim) {
+  process.stderr.write(`Gates do Balcão: ${nodeRuim}\n`)
+  process.exit(1)
+}
 
 const bin = (pasta, nome) => path.join(RAIZ, pasta, 'node_modules', '.bin', nome)
 const relativo = (arquivo) => path.relative(RAIZ, path.resolve(RAIZ, arquivo)).split(path.sep).join('/')
