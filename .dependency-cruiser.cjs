@@ -13,7 +13,17 @@ const pacote = (...nomes) => {
 }
 
 const PRISMA = pacote('@prisma/client', '.prisma/client')
-const EXPRESS_E_MULTER = pacote('express', 'multer', '@types/express', '@types/multer', 'express-serve-static-core')
+// Os tipos do Express moram em pacotes @types separados: `Request` vem de
+// @types/express-serve-static-core, e um `import type` desse pacote também é
+// "serviço conhecendo o Express".
+const EXPRESS_E_MULTER = pacote(
+  'express',
+  '@types/express',
+  'express-serve-static-core',
+  '@types/express-serve-static-core',
+  'multer',
+  '@types/multer',
+)
 const OPENAI = pacote('openai')
 
 /** @type {import('dependency-cruiser').IConfiguration} */

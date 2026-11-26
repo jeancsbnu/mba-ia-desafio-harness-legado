@@ -275,10 +275,12 @@ function escreverEnvApi(gerenciadas) {
   )
 }
 
-function escreverEnvWeb(apiUrl) {
+// WEB_PORT é lida pelo web/vite.config.ts: `npm run dev` direto em web/ também
+// sobe na porta desta cópia.
+function escreverEnvWeb(apiUrl, webPorta) {
   fs.writeFileSync(
     path.join(RAIZ, 'web', '.env.local'),
-    `# Gerado por \`npm run up\` para a cópia ${COPIA}.\nVITE_API_URL=${apiUrl}\n`,
+    `# Gerado por \`npm run up\` para a cópia ${COPIA}.\nVITE_API_URL=${apiUrl}\nWEB_PORT=${webPorta}\n`,
   )
 }
 
@@ -355,11 +357,17 @@ async function up() {
   }
   fs.mkdirSync(DIR_ANEXOS, { recursive: true })
   escreverEnvApi(gerenciadas)
-  escreverEnvWeb(apiUrl)
+  escreverEnvWeb(apiUrl, webPorta)
 
   // As variáveis desta cópia vão explícitas para os filhos: um PORT ou
   // DATABASE_URL exportado no shell não pode apontar a cópia para outro lugar.
-  const env = { ...process.env, ...gerenciadas, VITE_API_URL: apiUrl, BALCAO_COPIA: COPIA }
+  const env = {
+    ...process.env,
+    ...gerenciadas,
+    VITE_API_URL: apiUrl,
+    WEB_PORT: String(webPorta),
+    BALCAO_COPIA: COPIA,
+  }
   const emApi = { cwd: path.join(RAIZ, 'api'), env }
 
   rodarOuFalhar('prisma generate', 'npx', ['prisma', 'generate'], emApi)

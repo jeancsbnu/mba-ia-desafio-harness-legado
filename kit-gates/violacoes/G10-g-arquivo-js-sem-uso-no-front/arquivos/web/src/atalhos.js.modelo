@@ -1,0 +1,1 @@
+export const ATALHO_NOVO_CHAMADO = 'n'

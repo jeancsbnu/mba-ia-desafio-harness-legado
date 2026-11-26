@@ -8,10 +8,14 @@
     },
     "api": {
       "entry": ["src/**/*.test.ts", "test/**/*.test.ts"],
-      "project": ["src/**/*.ts", "prisma/**/*.ts", "test/**/*.ts"]
+      "project": [
+        "src/**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}",
+        "prisma/**/*.{ts,mts,cts,js,mjs,cjs}",
+        "test/**/*.{ts,mts,cts,js,mjs,cjs}"
+      ]
     },
     "web": {
-      "project": ["src/**/*.{ts,tsx}"]
+      "project": ["src/**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"]
     }
   }
 }

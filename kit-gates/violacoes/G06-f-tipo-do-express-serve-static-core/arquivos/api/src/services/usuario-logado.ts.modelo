@@ -1,0 +1,5 @@
+import type { Request } from 'express-serve-static-core'
+
+export function idDoUsuario(req: Request) {
+  return req.header('x-user-id') ?? 'anonimo'
+}
