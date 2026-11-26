@@ -59,6 +59,9 @@ arquivo são as que a própria regra define: `api/src/config/` e `web/src/config
 `gates --commit`: G1 (tsc em `api/` e `web/`) e G2 (eslint, que inclui G5 e G11). Verificar o stage, e
 não a pasta de trabalho, garante que o commit leva exatamente o que passou.
 
+Num clone que ainda não rodou `npm run up`, o hook não está ativo. Nesse caso, `npm run gates` avisa no
+fim da saída, sem mudar o código de saída.
+
 ## Regras próprias
 
 ### G11: sem endereço fixo fora de `config/`
