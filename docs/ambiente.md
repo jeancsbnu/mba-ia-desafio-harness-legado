@@ -27,7 +27,8 @@ diferentes, têm nomes diferentes. Tudo o que a cópia cria leva esse nome ou fi
 3. Roda `npm ci` na raiz, em `api/` e em `web/`, só quando o `package-lock.json` mudou desde a última
    instalação. `npm ci` respeita o lockfile como ele está.
 4. Ativa o hook de pre-commit (`git config core.hooksPath .githooks`).
-5. Sobe o Postgres da cópia e espera ele ficar saudável.
+5. Sobe o Postgres da cópia e espera ele aceitar conexão por TCP (healthcheck `pg_isready -h 127.0.0.1`).
+   Pelo socket não serve: num volume novo, o Postgres responde ali enquanto ainda está criando o banco.
 6. Escolhe as portas, grava `api/.env` e `web/.env.local`. As chaves de endereço (`DATABASE_URL`, `PORT`,
    `UPLOAD_DIR`, `CORS_ORIGIN`) são sempre regravadas; as outras (`AI_MODE`, `OPENAI_API_KEY`,
    `JWT_SECRET`) mantêm o que já estava no `.env`.

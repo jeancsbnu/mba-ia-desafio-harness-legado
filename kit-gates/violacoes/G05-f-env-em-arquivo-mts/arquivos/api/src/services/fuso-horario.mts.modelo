@@ -1,0 +1,1 @@
+export const fusoHorario = process.env.TZ ?? 'America/Sao_Paulo'

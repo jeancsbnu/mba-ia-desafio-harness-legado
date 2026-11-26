@@ -1,0 +1,1 @@
+export const chaveTelemetria = import.meta.env.VITE_TELEMETRIA_KEY

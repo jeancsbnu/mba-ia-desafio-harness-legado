@@ -1,0 +1,1 @@
+export const tamanhoDoLote = Number(process.env.TAMANHO_DO_LOTE ?? 10)

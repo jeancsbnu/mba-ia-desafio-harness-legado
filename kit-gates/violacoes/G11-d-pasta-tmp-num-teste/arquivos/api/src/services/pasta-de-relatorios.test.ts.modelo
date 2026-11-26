@@ -1,0 +1,8 @@
+import { describe, expect, it } from 'vitest'
+
+describe('pasta de relatórios', () => {
+  it('fica fora do repositório', () => {
+    const pasta = '/tmp/balcao-relatorios'
+    expect(pasta.startsWith('/')).toBe(true)
+  })
+})

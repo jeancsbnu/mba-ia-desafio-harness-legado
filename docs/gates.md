@@ -32,6 +32,10 @@ gates rodam com o `git status` limpo, como o `kit-gates/` exige.
 
 G11, G12 e G13 são as regras próprias deste repositório (motivação abaixo).
 
+G5 e G11 olham todo arquivo de código em `api/src/` e `web/src/`: `.ts`, `.tsx`, `.mts`, `.cts`, `.js`,
+`.jsx`, `.mjs` e `.cjs`, testes inclusive. A G5 acusa o `process` do Node, não um parâmetro ou variável
+local que por acaso se chame `process`.
+
 ### Imports só de tipo (G6, G8 e G9)
 
 O dependency-cruiser roda com `tsPreCompilationDeps: true`: ele lê o TypeScript antes da compilação,
@@ -64,8 +68,14 @@ front caindo em `http://localhost:4000` em três lugares, anexos em `/tmp/balcao
 worktrees, a segunda cópia falava com a API da primeira e misturava os anexos. Endereço e pasta são
 configuração: só podem aparecer em `api/src/config/` ou `web/src/config/`, que leem o valor de cada cópia.
 
+Teste também é acusado, de propósito: as duas cópias rodam os testes ao mesmo tempo, e um teste que
+escreve em `/tmp/balcao-x` ou chama `http://localhost:4000` colide com o da outra cópia (ou com outro
+sistema da máquina). Num teste, a mensagem da regra já diz o que fazer: pasta com
+`mkdtemp(join(tmpdir(), 'balcao-'))` e URL lida de `config/`.
+
 **Exemplos de violação** (formato do `kit-gates/`): `kit-gates/violacoes/G11-a-url-fixa-no-front`
-(URL fixa no front) e `kit-gates/violacoes/G11-b-pasta-tmp-na-api` (pasta em `/tmp` num serviço).
+(URL fixa no front), `kit-gates/violacoes/G11-b-pasta-tmp-na-api` (pasta em `/tmp` num serviço),
+`kit-gates/violacoes/G11-c-url-fixa-em-jsx` e `kit-gates/violacoes/G11-d-pasta-tmp-num-teste`.
 
 ```bash
 bash kit-gates/verificar.sh . "npm run gates" G11
@@ -92,7 +102,7 @@ bash kit-gates/verificar.sh . "npm run gates" G12
 `api/src/controllers/`, `api/tests/` e `web/src/store/` (não existiam) e pedia axios (o front usa
 `fetch`). Cada agente que lia aquilo errava de primeira. A G13 confere, a cada execução dos gates, que o
 `AGENTS.md` tem no máximo 60 linhas, que o `CLAUDE.md` aponta para ele e que todo caminho e todo
-`npm run` citados existem. Comandos com placeholder (`<api>`) ficam de fora, e por isso o `AGENTS.md`
+script npm citado (`npm run x`, `npm --prefix api run x`, `npm test`, `npm start`) existem. Comandos com placeholder (`<api>`) ficam de fora, e por isso o `AGENTS.md`
 explica como preencher cada um.
 
 **Exemplo de violação** (patch, porque a regra olha um arquivo que já existe):
@@ -107,8 +117,9 @@ git checkout -- AGENTS.md
 
 O `kit-gates/` planta violações, uma por vez, e confere a linha com o ID e o arquivo. Além das 19
 violações originais, `kit-gates/violacoes/` tem variações das mesmas regras (import type inline,
-re-export de tipo, import dinâmico, env desestruturado ou por colchetes, ciclo só de tipo, tipo
-exportado sem uso, dependência sem uso no front) e os exemplos das regras próprias:
+re-export de tipo, import dinâmico, env desestruturado ou por colchetes, env e URL fixa em `.mts`,
+`.js`, `.mjs` e `.jsx`, pasta em `/tmp` num teste, ciclo só de tipo, tipo exportado sem uso,
+dependência sem uso no front) e os exemplos das regras próprias:
 
 ```bash
 bash kit-gates/verificar.sh . "npm run gates"        # todas

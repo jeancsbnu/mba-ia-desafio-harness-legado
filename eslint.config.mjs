@@ -7,8 +7,10 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import balcao from './scripts/eslint-balcao.mjs'
 
-const CODIGO_API = ['api/src/**/*.ts']
-const CODIGO_WEB = ['web/src/**/*.{ts,tsx}']
+// Todas as extensões de código: uma regra que só olha .ts deixa passar o mesmo
+// erro num .mts, .js ou .jsx (docs/incidentes.md, incidentes 5 e 7).
+const CODIGO_API = ['api/src/**/*.{ts,mts,cts,js,mjs,cjs}']
+const CODIGO_WEB = ['web/src/**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}']
 const CONFIG_API = ['api/src/config/**']
 const CONFIG_WEB = ['web/src/config/**']
 
@@ -32,15 +34,16 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.{js,mjs,cjs}'],
+    files: ['**/*.{js,mjs,cjs,jsx}'],
     rules: { 'no-unused-vars': ['error', { caughtErrors: 'all' }] },
   },
+  { files: ['**/*.jsx'], languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } } },
   {
-    files: ['api/**/*.{ts,mts}', 'scripts/**/*.mjs', '*.{mjs,cjs}', 'web/vite.config.ts'],
+    files: ['api/**/*.{ts,mts,cts,js,mjs,cjs}', 'scripts/**/*.mjs', '*.{mjs,cjs}', 'web/vite.config.ts'],
     languageOptions: { globals: globals.node },
   },
   { files: ['**/*.cjs'], languageOptions: { sourceType: 'commonjs' } },
-  { files: ['web/src/**/*.{ts,tsx}'], languageOptions: { globals: globals.browser } },
+  { files: CODIGO_WEB, languageOptions: { globals: globals.browser } },
   {
     plugins: { balcao },
     files: [...CODIGO_API, ...CODIGO_WEB],

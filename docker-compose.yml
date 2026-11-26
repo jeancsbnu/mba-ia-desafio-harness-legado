@@ -14,7 +14,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U balcao -d balcao"]
+      # Por TCP, não pelo socket. Num volume novo, o Postgres cria o banco num
+      # servidor temporário que só escuta no socket e depois reinicia. Pelo
+      # socket, o `--wait` liberava a subida antes da hora e as migrations
+      # falhavam com P1001 (docs/incidentes.md, incidente 6).
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U balcao -d balcao"]
       interval: 2s
       timeout: 3s
       retries: 30

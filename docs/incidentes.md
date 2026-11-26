@@ -110,3 +110,50 @@ agora olha ts, tsx, mts, cts, js, jsx, mjs e cjs em `api/` e `web/`. O kit ganho
 G10-f e G10-g. O Vite lê a porta de `WEB_PORT`, que o `npm run up` grava no `web/.env.local`.
 
 **Commit:** `db2857d` (Revisão: G6 pega os tipos do Express, G10 olha todas as extensões)
+
+---
+
+## 6. A primeira subida num clone limpo falhava nas migrations
+
+**O que aconteceu.** Uma segunda revisão independente (Sonnet) seguiu o fluxo do avaliador. A primeira
+`npm run up` de um clone limpo parou com `P1001: Can't reach database server`, e a da worktree nova
+também. Rodar `npm run up` de novo resolvia. O agente que fez o harness tinha validado esse mesmo fluxo
+e visto a subida passar: a falha dependia de tempo e não apareceu naquela rodada.
+
+**Por que o harness deixou.** O healthcheck do Postgres (`pg_isready` sem `-h`) testava o socket Unix.
+Num volume novo, a imagem do Postgres cria o banco num servidor temporário que só escuta no socket,
+desliga e só então sobe o servidor definitivo na porta TCP. O healthcheck dava "saudável" no servidor
+temporário, o `docker compose up --wait` liberava a subida e o `prisma migrate deploy` batia numa porta
+que ainda não respondia. Em três subidas com volume novo, nenhuma aceitava conexão TCP logo depois do
+`--wait`.
+
+**Mudança no harness.** O healthcheck testa por TCP (`pg_isready -h 127.0.0.1`), que só responde no
+servidor definitivo. Depois da mudança, as mesmas três subidas aceitaram conexão logo depois do `--wait`.
+Um clone limpo e uma worktree nova também subiram de primeira, e a caixa-preta deu 51 de 51 nas duas. O
+`docs/ambiente.md` explica por que o socket não serve.
+
+**Commit:** `98801d9` (Banco: healthcheck por TCP, a primeira subida não falha nas migrations)
+
+---
+
+## 7. O furo de extensão da G10 se repetia na G5 e na G11
+
+**O que aconteceu.** O incidente 5 corrigiu a G10, que só olhava `.ts` e `.tsx`. A segunda revisão achou
+o mesmo furo na G5 e na G11. O plugin do ESLint só valia para `api/src/**/*.ts` e
+`web/src/**/*.{ts,tsx}`, e um `process.env` num `.mts`, ou um `import.meta.env` num `.js` do front,
+passava em branco. A revisão também achou erros na direção contrária. A G5 acusava um parâmetro que só
+se chamava `process`, e a G13 aceitava `` `npm test` `` no `AGENTS.md`, embora a raiz não tenha esse
+script.
+
+**Por que o harness deixou.** Ao corrigir a G10, o agente olhou só o gate que a revisão apontou e não
+procurou o mesmo padrão de glob nos outros. A G5 olhava o nome `process`, não a variável. A G13 só
+reconhecia a forma `npm run x`.
+
+**Mudança no harness.** G5 e G11 olham todas as extensões de código em `api/src/` e `web/src/`. A G5
+resolve o escopo antes de acusar. A G13 confere também `npm test`, `npm start` e `npm run-script`. O kit
+ganhou as variações G05-f, G05-g, G05-h, G11-c e G11-d. A G11 continua valendo em teste, de propósito:
+as cópias rodam os testes ao mesmo tempo, e a mensagem diz como criar a pasta temporária (ver
+`docs/gates.md`). O `AGENTS.md` pede que, achado um furo num gate, o mesmo furo seja procurado nos outros.
+
+**Commits:** `7e16d83` (Gates: G5 e G11 em todas as extensões, G5 sem falso positivo, G13 confere npm
+test) e `ea9fbd9` (AGENTS.md: furo achado num gate se procura também nos outros)
