@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { User } from '../domain/user'
 import { UserRepository } from '../repositories/user-repository'
 
 export class EmailTakenError extends Error {}
@@ -16,7 +17,7 @@ export const loginSchema = z.object({
   password: z.string(),
 })
 
-export function serializeUser(user: any) {
+function serializeUser(user: Pick<User, 'id' | 'name' | 'email' | 'role'>) {
   return { id: user.id, name: user.name, email: user.email, role: user.role }
 }
 
@@ -37,5 +38,11 @@ export class AuthService {
     const ok = await bcrypt.compare(input.password, user.passwordHash)
     if (!ok) throw new InvalidCredentialsError('E-mail ou senha inválidos')
     return serializeUser(user)
+  }
+
+  // Perfil do usuário logado; null quando a conta não existe mais.
+  async me(userId: string) {
+    const user = await this.users.findById(userId)
+    return user ? serializeUser(user) : null
   }
 }
