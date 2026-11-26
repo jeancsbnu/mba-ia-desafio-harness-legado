@@ -1,0 +1,5 @@
+import { type Request } from 'express'
+
+export function idDaRequisicao(req: Request) {
+  return req.headers['x-request-id'] ?? 'sem-id'
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "includeEntryExports": true,
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs"],
+      "project": ["scripts/**/*.mjs"]
+    },
+    "api": {
+      "entry": ["src/**/*.test.ts", "test/**/*.test.ts"],
+      "project": ["src/**/*.ts", "prisma/**/*.ts", "test/**/*.ts"]
+    },
+    "web": {
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  }
+}

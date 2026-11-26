@@ -1,0 +1,7 @@
+# Tudo que é texto fica com LF, inclusive num checkout no Windows:
+# scripts e hooks com CRLF quebram no Linux e no macOS.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary

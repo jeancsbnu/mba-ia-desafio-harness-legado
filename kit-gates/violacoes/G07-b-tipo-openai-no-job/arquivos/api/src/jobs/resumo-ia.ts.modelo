@@ -1,0 +1,5 @@
+import type OpenAI from 'openai'
+
+export function modelo(cliente: OpenAI) {
+  return cliente.baseURL
+}

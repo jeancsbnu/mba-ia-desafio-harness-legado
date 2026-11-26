@@ -1,0 +1,3 @@
+const { env } = process
+
+export const LIMITE_UPLOAD_MB = Number(env.LIMITE_UPLOAD_MB || 5)

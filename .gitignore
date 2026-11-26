@@ -1,3 +1,7 @@
 node_modules
 .env
+.env.local
 dist
+
+# Estado de cada cópia criado por `npm run up` (portas, PIDs, logs e anexos)
+.balcao/

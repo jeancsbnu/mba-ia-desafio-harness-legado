@@ -1,3 +1,6 @@
+# Postgres de UMA cópia do Balcão. Não suba direto: use `npm run up`, que
+# dá a cada cópia (clone ou worktree) o seu projeto do compose
+# (`-p balcao-<cópia>`), o seu volume e a sua porta.
 services:
   db:
     image: postgres:16
@@ -6,9 +9,15 @@ services:
       POSTGRES_PASSWORD: balcao
       POSTGRES_DB: balcao
     ports:
-      - "5432:5432"
+      # Porta do host escolhida pelo Docker: duas cópias nunca disputam a 5432.
+      - "127.0.0.1::5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U balcao -d balcao"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
 
 volumes:
   pgdata:

@@ -9,12 +9,15 @@ import {
   getTicket,
   resolveTicket,
   suggestReply,
+  TicketCategory,
   TicketDetail,
+  TicketPriority,
+  TriageStatus,
   uploadAttachment,
 } from '../api/tickets'
 import StatusBadge from '../components/StatusBadge'
 import { categoryLabels, formatBytes, formatDate, priorityLabels } from '../utils/format'
-import type { TicketCategory, TicketPriority, TriageStatus } from '../../../api/src/domain/ticket'
+import { API_URL } from '../config/env'
 
 function triageText(triageStatus: TriageStatus, category: TicketCategory | null, priority: TicketPriority | null) {
   if (triageStatus === 'pending') return 'Em triagem'
@@ -34,7 +37,7 @@ export default function TicketDetailPage() {
   const load = useCallback(() => {
     getTicket(id!)
       .then(setTicket)
-      .catch((err) => setError(err.message))
+      .catch((err) => setError((err as Error).message))
   }, [id])
 
   useEffect(() => {
@@ -52,8 +55,8 @@ export default function TicketDetailPage() {
     try {
       await action()
       load()
-    } catch (err: any) {
-      setActionError(err.message)
+    } catch (err) {
+      setActionError((err as Error).message)
     }
   }
 
@@ -70,8 +73,8 @@ export default function TicketDetailPage() {
     try {
       const data = await suggestReply(id!)
       setBody(data.suggestion)
-    } catch (err: any) {
-      setActionError(err.message)
+    } catch (err) {
+      setActionError((err as Error).message)
     }
   }
 
@@ -86,8 +89,7 @@ export default function TicketDetailPage() {
   }
 
   async function handleDownload(attachment: Attachment) {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-    const res = await fetch(`${apiUrl}/api/attachments/${attachment.id}/download`, {
+    const res = await fetch(`${API_URL}/api/attachments/${attachment.id}/download`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
     if (!res.ok) {

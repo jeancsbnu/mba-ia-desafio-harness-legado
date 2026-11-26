@@ -1,0 +1,6 @@
+export type Periodo = { inicio: Date; fim: Date }
+export type Intervalo = { dias: number }
+
+export function duracao(p: Periodo) {
+  return p.fim.getTime() - p.inicio.getTime()
+}
