@@ -250,6 +250,7 @@ async function documentacao() {
     }
     const exec = citado.match(/^(?:bash|node|sh) (\S+)/)
     const caminho = exec ? exec[1] : citado
+    if (caminho.startsWith('@')) continue // pacote npm com escopo, não caminho
     const pareceCaminho = /^\.{0,2}\/?[\w.@-]+(\/[\w.@*-]*)+$/.test(caminho) || /^[\w.-]+\.(md|ts|tsx|mts|mjs|cjs|js|json|ya?ml|sh|prisma)$/.test(caminho)
     if (!pareceCaminho || gerado(caminho)) continue
     if (!existeCaminho(caminho)) {
