@@ -23,6 +23,11 @@ import { fileURLToPath } from 'node:url'
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SO_COMMIT = process.argv.includes('--commit')
 
+// `npm run gates | head` não pode virar stack trace nem mudar o código de saída.
+process.stdout.on('error', (err) => {
+  if (err.code !== 'EPIPE') throw err
+})
+
 const bin = (pasta, nome) => path.join(RAIZ, pasta, 'node_modules', '.bin', nome)
 const relativo = (arquivo) => path.relative(RAIZ, path.resolve(RAIZ, arquivo)).split(path.sep).join('/')
 

@@ -49,6 +49,14 @@ const PROCESSOS = [
 
 // ---------------------------------------------------------------- utilitários
 
+// Saída cortada (`npm run status | head`) não pode derrubar o script no meio
+// de uma subida nem virar stack trace: quem leu o que queria já foi embora.
+for (const saida of [process.stdout, process.stderr]) {
+  saida.on('error', (err) => {
+    if (err.code !== 'EPIPE') throw err
+  })
+}
+
 function log(msg) {
   process.stdout.write(`${msg}\n`)
 }
