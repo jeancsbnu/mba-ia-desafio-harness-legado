@@ -1,0 +1,12 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 132f854..48cb8fc 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -7,6 +7,7 @@ Central de chamados: API (Express + Prisma + Postgres), worker de triagem (proce
+ - Subir tudo: `npm run up`. Instala, sobe o Postgres da cópia, migra, roda a seed e sobe API, worker e
+   front. Pode rodar de novo sem derrubar. A saída mostra API, front, banco e pasta de anexos.
+ - Rever endereços e processos: `npm run status`. Logs em `.balcao/logs/`.
++- Migrations: `npm run migrate`; controllers ficam em `api/src/controllers/`.
+ - Derrubar só esta cópia: `npm run down` (`npm run down -- --apagar-dados` apaga também o banco).
+ - Portas nunca são fixas: não suba nada na mão em 3000/4000/5173/5432 e nunca use `kill -9` por porta
+   (o processo pode ser de outra cópia ou de outro sistema). Detalhe: [docs/ambiente.md](docs/ambiente.md).
