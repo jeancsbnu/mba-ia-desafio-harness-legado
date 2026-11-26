@@ -50,13 +50,33 @@ const envSoEmConfig = {
     },
   },
   create(context) {
-    // nomes locais que apontam para `process` ou `import.meta` (aliases e imports)
-    const alvos = new Set(['process'])
+    const { sourceCode } = context
+    // variáveis do arquivo que apontam para `process`: import de 'process' ou alias
+    const aliases = new Set()
+
+    function variavelDe(identificador) {
+      for (let escopo = sourceCode.getScope(identificador); escopo; escopo = escopo.upper) {
+        const variavel = escopo.set.get(identificador.name)
+        if (variavel) return variavel
+      }
+      return null
+    }
+
+    function marcarAlias(node) {
+      for (const variavel of sourceCode.getDeclaredVariables(node)) aliases.add(variavel)
+    }
 
     function ehAlvo(node) {
       const n = semEmbrulho(node)
       if (!n) return false
-      if (n.type === 'Identifier') return alvos.has(n.name)
+      if (n.type === 'Identifier') {
+        const variavel = variavelDe(n)
+        // sem declaração no arquivo: é o `process` global do Node
+        if (!variavel || variavel.defs.length === 0) return n.name === 'process'
+        // declarado no arquivo: só conta se veio de 'process'. Um parâmetro que
+        // se chama `process` é outra coisa e não é acusado.
+        return aliases.has(variavel)
+      }
       if (n.type === 'MetaProperty') return n.meta.name === 'import' && n.property.name === 'meta'
       if (n.type === 'MemberExpression') {
         const obj = semEmbrulho(n.object)
@@ -66,7 +86,7 @@ const envSoEmConfig = {
     }
 
     function reportar(node) {
-      context.report({ node, messageId: 'env', data: { acesso: context.sourceCode.getText(node).slice(0, 60) } })
+      context.report({ node, messageId: 'env', data: { acesso: sourceCode.getText(node).slice(0, 60) } })
     }
 
     function padraoComEnv(pattern) {
@@ -83,15 +103,15 @@ const envSoEmConfig = {
           if (s.type === 'ImportSpecifier') {
             const importado = s.imported.name ?? s.imported.value
             if (importado === 'env') reportar(s)
-            if (importado === 'default') alvos.add(s.local.name)
+            if (importado === 'default') marcarAlias(s)
           } else {
-            alvos.add(s.local.name)
+            marcarAlias(s)
           }
         }
       },
       VariableDeclarator(node) {
         if (!node.init) return
-        if (node.id.type === 'Identifier' && ehAlvo(node.init)) alvos.add(node.id.name)
+        if (node.id.type === 'Identifier' && ehAlvo(node.init)) marcarAlias(node)
         if (padraoComEnv(node.id) && ehAlvo(node.init)) reportar(node)
       },
       AssignmentExpression(node) {
@@ -113,12 +133,17 @@ const semEnderecoFixo = {
     schema: [],
     messages: {
       fixo: '[G11] endereço fixo "{{trecho}}" fora de config/: cada cópia tem o seu; leia de api/src/config/ (ou web/src/config/).',
+      fixoEmTeste:
+        '[G11] endereço fixo "{{trecho}}" num teste: duas cópias rodam os testes ao mesmo tempo. Pasta: crie com mkdtemp(join(tmpdir(), "balcao-")); URL: leia de config/.',
     },
   },
   create(context) {
+    // Teste também é acusado, de propósito: um teste com pasta em /tmp ou URL
+    // fixa colide com o teste da outra cópia. A mensagem diz como fazer.
+    const ehTeste = /\.test\.[cm]?[jt]sx?$/.test(context.filename)
     function conferir(node, texto) {
       if (typeof texto === 'string' && ENDERECO_FIXO.test(texto)) {
-        context.report({ node, messageId: 'fixo', data: { trecho: texto.slice(0, 60) } })
+        context.report({ node, messageId: ehTeste ? 'fixoEmTeste' : 'fixo', data: { trecho: texto.slice(0, 60) } })
       }
     }
     return {

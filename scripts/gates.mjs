@@ -196,6 +196,7 @@ async function codigoMorto() {
 // ------------------------------------------------------- G13 documentação
 
 const LIMITE_AGENTS = 60
+const ATALHOS_NPM = { t: 'test', tst: 'test' }
 
 function ignoradosPeloGit() {
   try {
@@ -245,11 +246,13 @@ async function documentacao() {
 
   for (const citado of citados) {
     if (/<[^>]+>/.test(citado)) continue // placeholder explicado no próprio AGENTS.md
-    const npm = citado.match(/^npm (?:--prefix (\S+) )?run ([\w:.-]+)/)
+    // `npm run x`, `npm run-script x` e os atalhos `npm test`, `npm start`...
+    const npm = citado.match(/^npm (?:--prefix (\S+) )?(?:run(?:-script)? ([\w:.-]+)|(test|t|tst|start|stop|restart)(?=\s|$))/)
     if (npm) {
       const pasta = npm[1] || '.'
-      if (!scriptsDe(pasta)[npm[2]]) {
-        violacoes.push({ id: 'G13', arquivo: 'AGENTS.md', detalhe: `comando inexistente: \`${citado}\` (sem script "${npm[2]}" em ${pasta}/package.json)` })
+      const script = npm[2] ?? ATALHOS_NPM[npm[3]] ?? npm[3]
+      if (!scriptsDe(pasta)[script]) {
+        violacoes.push({ id: 'G13', arquivo: 'AGENTS.md', detalhe: `comando inexistente: \`${citado}\` (sem script "${script}" em ${pasta}/package.json)` })
       }
       continue
     }
