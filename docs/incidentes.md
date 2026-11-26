@@ -23,7 +23,8 @@ portas fixas, e a documentação ensinava a matar quem estivesse no caminho.
 escolhida pelo Docker. API e front usam portas livres, e os processos são encerrados pelo grupo que a
 própria cópia iniciou, nunca pela porta. O `AGENTS.md` proíbe `kill -9` por porta.
 
-**Commit:** `005d224` (Ambiente por cópia: npm run up/down/status)
+**Commits:** `005d224` (Ambiente por cópia: npm run up/down/status) e `2d8f4dd` (AGENTS.md no lugar do
+CLAUDE.md que mandava dar `kill -9`)
 
 ---
 
@@ -66,4 +67,22 @@ uma pasta temporária (`scripts/pre-commit.mjs`). Um commit que leva só parte d
 quebra tipo ou lint, é bloqueado. O `AGENTS.md` pede `git add` e `git commit` em comandos separados e a
 conferência de `git diff --cached --stat`.
 
-**Commit:** `b44fcbb` (Hook de pre-commit: tipo e lint sobre o que está no stage)
+**Commits:** `b44fcbb` (Hook de pre-commit: tipo e lint sobre o que está no stage) e `2d8f4dd` (regra de
+commit no AGENTS.md)
+
+---
+
+## 4. `npm run status | head` terminava com um stack trace
+
+**O que aconteceu.** Na validação final, seguindo o fluxo do avaliador, o agente cortou a saída do status
+com `| head -2`, como agentes fazem o tempo todo. O `scripts/ambiente.mjs` morreu com
+`Error: write EPIPE` e um stack trace de vinte linhas. Nada estava quebrado no ambiente. Mesmo assim, o
+próximo agente que visse aquilo iria investigar o lugar errado. O mesmo valia para `npm run gates | head`.
+
+**Por que o harness deixou.** Os scripts escreviam na saída padrão sem tratar o leitor que fecha o pipe
+antes do fim, e nenhum teste cortava a saída.
+
+**Mudança no harness.** `scripts/ambiente.mjs` e `scripts/gates.mjs` ignoram EPIPE: a subida continua até
+o fim e o código de saída dos gates não muda.
+
+**Commit:** `0d66284` (Scripts do harness não quebram com a saída cortada)
