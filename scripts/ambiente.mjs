@@ -17,6 +17,8 @@ import net from 'node:net'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { problemaDoNode } from './node-suportado.mjs'
+
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DIR_ESTADO = path.join(RAIZ, '.balcao')
 const ARQ_ESTADO = path.join(DIR_ESTADO, 'estado.json')
@@ -291,8 +293,8 @@ function compose(args, opcoes = {}) {
 }
 
 function checarPreRequisitos() {
-  const major = Number(process.versions.node.split('.')[0])
-  if (major < 22) falhar(`Node ${process.versions.node} é antigo: use Node 22 ou mais novo (LTS).`)
+  const nodeRuim = problemaDoNode()
+  if (nodeRuim) falhar(nodeRuim)
   const docker = rodar('docker', ['info', '--format', '{{.ServerVersion}}'])
   if (docker.status !== 0) falhar('o Docker não está respondendo. Abra o Docker e rode de novo.')
   const versao = rodar('docker', ['compose', 'version'])

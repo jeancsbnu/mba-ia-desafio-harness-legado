@@ -12,6 +12,10 @@ G10 api/package.json left-pad  (dependência sem uso)
 Nada é escrito dentro do repositório (o relatório do Vitest vai para uma pasta temporária), então os
 gates rodam com o `git status` limpo, como o `kit-gates/` exige.
 
+Antes de qualquer verificação, os gates (e o hook) conferem a versão do Node contra o `engines` do
+`package.json`. Fora da faixa, param com código 1 e dizem o que instalar: com o Node errado, uma
+ferramenta quebra sem dizer por quê (o knip, na 22.11) e a falha pareceria violação.
+
 ## Regras
 
 | ID | Regra | Ferramenta | Onde está configurada |

@@ -14,8 +14,9 @@ documentação para agentes ([AGENTS.md](AGENTS.md)).
 
 ## Como rodar
 
-**Pré-requisitos:** Linux ou macOS (no Windows, WSL), Node.js 22 ou mais novo (LTS), Docker com
-`docker compose` e Git. Nenhuma porta precisa estar livre de antemão.
+**Pré-requisitos:** Linux ou macOS (no Windows, WSL), Node.js 22.13 ou mais novo numa linha LTS (22, 24
+ou 26), Docker com `docker compose` e Git. Nenhuma porta precisa estar livre de antemão. Com o Node fora
+dessa faixa, `npm run up` e `npm run gates` param logo no começo e dizem o que instalar.
 
 ```bash
 npm run up       # sobe tudo desta cópia; pode rodar de novo sem derrubar
